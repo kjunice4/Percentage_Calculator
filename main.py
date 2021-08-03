@@ -1,22 +1,4 @@
 # Percentage Calculator
-"""
-entry = input("Enter Number: ")
-rate = input("% Rate: ")
-inc_or_dec = input("Enter Increase or Decrease: ")
-if inc_or_dec.lower() == 'increase':
-    answer = float(entry) + (float(entry) * float(rate) / 100)
-    print()
-    print("Total: ",answer)
-elif inc_or_dec.lower() == 'decrease':
-    answer = float(entry) - (float(entry) * float(rate) / 100)
-    print()
-    print("Total: ",answer)
-else:
-    print("Invalid Entry")
-
-"""
-
-# Percentage Calculator
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -37,7 +19,7 @@ Builder.load_string("""
         Button:
             background_normal: "KSquared_Logo.png"
             on_release:
-                app.root.current = "Percentage_Calculator"
+                app.root.current = "Menu"
                 root.manager.transition.direction = "left" 
                 
         Button:
@@ -47,9 +29,77 @@ Builder.load_string("""
             height: 200
             text: "KSquared Percentage Calculator"
             on_release:
-                app.root.current = "Percentage_Calculator"
+                app.root.current = "Menu"
                 root.manager.transition.direction = "left" 
 
+""")
+
+# Menu
+Builder.load_string("""
+<Menu>
+    id:Menu
+    name:"Menu"
+    
+    ScrollView:
+        name: "Scroll"
+        do_scroll_x: False
+        do_scroll_y: True
+        
+        GridLayout:
+            cols: 1
+            padding:10
+            spacing:10
+            size_hint: 1, None
+            width:200
+            height: self.minimum_height
+            
+            Label:
+                font_size: 75
+                size_hint_y: None
+                height: 200
+                padding: 10, 10
+                text: "Menu"
+            
+            Button:
+                text: "Percentage Calculator"   
+                font_size: 75
+                background_color: 0, 0 , 1 , 1
+                size_hint_y: None
+                height: 200
+                padding: 10, 10
+                on_release:
+                    app.root.current = "Percentage_Calculator"
+                    root.manager.transition.direction = "left" 
+                    
+            Button:
+                font_size: 75
+                background_color: 0, 0 , 0 , 1
+                size_hint_y: None
+                height: 400
+                text: "Visit KSquared,LLC"
+                on_release:
+                    import webbrowser
+                    webbrowser.open('https://kevinjunice.wixsite.com/ksquaredllc')
+            Button:
+                font_size: 75
+                background_color: 0, 0 , 0 , 1
+                size_hint_y: None
+                height: 400
+                text: "Other apps from KSquared,LLC"
+                on_release:
+                    import webbrowser
+                    webbrowser.open('https://kevinjunice.wixsite.com/ksquaredllc/subscribe')   
+                
+            Button:
+                font_size: 75
+                background_color: 0, 0 , 0 , 1
+                size_hint_y: None
+                height: 400
+                text: "Donate to KSquared,LLC"
+                on_release:
+                    import webbrowser
+                    webbrowser.open('https://kevinjunice.wixsite.com/ksquaredllc/about-ksquared')
+            
 """)
 
 #Percentage_Calculator
@@ -88,14 +138,15 @@ Builder.load_string("""
                 height: self.minimum_height 
 
                 Button:
-                    text: "Clear Entry"   
+                    text: "Menu"   
                     font_size: 75
                     size_hint_y: None
+                    background_color: 0, 0 , 1 , 1
                     height: 200
                     padding: 10, 10
                     on_release:
-                        number.text = ""
-                        perc.text = ""
+                        app.root.current = "Menu"
+                        root.manager.transition.direction = "right" 
                         
                 Button:
                     id: steps
@@ -109,13 +160,6 @@ Builder.load_string("""
                         number.text = ""
                         perc.text = ""
                         list_of_steps.clear_widgets()       
-        
-            Label:
-                font_size: 75
-                size_hint_y: None
-                height: 200
-                padding: 10, 10
-                text: "Number:"
                                                     
             TextInput:
                 id: number
@@ -125,15 +169,9 @@ Builder.load_string("""
                 size_hint_y: None
                 height: 200
                 padding: 10
+                hint_text: "Number:"
                 input_filter: lambda text, from_undo: text[:8 - len(number.text)]           
             
-            Label:
-                font_size: 75
-                size_hint_y: None
-                height: 200
-                padding: 10, 10
-                text: "Percent:"
-                                                
             TextInput:
                 id: perc
                 text: perc.text
@@ -141,7 +179,8 @@ Builder.load_string("""
                 font_size: 125
                 size_hint_y: None
                 height: 200
-                padding: 10              
+                padding: 10         
+                hint_text: "Percent:"
                 input_filter: lambda text, from_undo: text[:8 - len(perc.text)]           
             
                 
@@ -259,8 +298,12 @@ class Percentage_Calculator(Screen):
 class Homepage(Screen):
     pass            
 
+class Menu(Screen):
+    pass            
+
 sm = ScreenManager()
 sm.add_widget(Homepage(name="Homepage"))
+sm.add_widget(Menu(name="Menu"))
 sm.add_widget(Percentage_Calculator(name="Percentage_Calculator"))     
 sm.current = "Homepage"   
 
