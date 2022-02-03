@@ -23,15 +23,24 @@ Builder.load_string("""
                 root.manager.transition.direction = "left" 
                 
         Button:
-            font_size: 75
+            font_size: 60
             background_color: 0, 0 , 0 , 1
             size_hint_y: None
             height: 200
             text: "KSquared Percentage Calculator"
             on_release:
                 app.root.current = "Menu"
+                root.manager.transition.direction = "left"         
+        Button:
+            font_size: 60
+            background_color: 0, 0 , 0 , 1
+            size_hint_y: None
+            height: 200
+            text: "KSquared-math,LLC ©"
+            on_release:
+                app.root.current = "Menu"
                 root.manager.transition.direction = "left" 
-
+                        
 """)
 
 # Menu
@@ -73,13 +82,91 @@ Builder.load_string("""
                     
             Button:
                 font_size: 75
-                background_color: 0, 0 , 0 , 1
                 size_hint_y: None
-                height: 400
-                text: "Visit KSquared,LLC"
+                height: 200
+                padding: 10, 10
+                text: "Visit KSquared-math,LLC ©"
                 on_release:
                     import webbrowser
-                    webbrowser.open('https://kevinjunice.wixsite.com/ksquaredllc')
+                    webbrowser.open('https://kevinjunice.wixsite.com/ksquaredllc/subscribe')
+            
+            Button:
+                font_size: 75
+                background_color: 1, 0, 1, 1
+                size_hint_y: None
+                height: 200
+                padding: 10, 10
+                text: "What's new?"
+                on_release:
+                    app.root.current = "updates"
+                    root.manager.transition.direction = "left"
+                    
+                    
+            Label:
+                font_size: 75
+                size_hint_y: None
+                height: 200
+                padding: 10, 10
+                text: "Share KSquared-math,LLC ©"
+                    
+            Image:
+                source: 'KSquared_QR_code.png'
+                size_hint_y: None
+                height: 1000
+                width: 1000
+""")
+
+#Updates
+Builder.load_string("""
+<updates>
+    id:updates
+    name:"updates"
+    
+    ScrollView:
+        name: "Scroll"
+        do_scroll_x: False
+        do_scroll_y: True
+    
+        GridLayout:
+            cols: 1
+            padding:10
+            spacing:10
+            size_hint: 1, None
+            width:200
+            height: self.minimum_height
+            
+            Label:
+                font_size: 60
+                size_hint_y: None
+                height: 200
+                padding: 10, 10
+                text: "What's new at KSquared-math?"
+            
+            Button:
+                id: steps
+                text: "Menu"   
+                font_size: 75
+                size_hint_y: None
+                background_color: 0, 0 , 1 , 1
+                height: 200
+                padding: 10, 10
+                on_release:
+                    app.root.current = "Menu"
+                    root.manager.transition.direction = "right" 
+                    
+            Label:
+                font_size: 40
+                size_hint_y: None
+                height: 200
+                padding: 10, 10
+                text: "Percentage Calculator v0.1"
+                
+            Label:
+                font_size: 40
+                size_hint_y: None
+                height: 200
+                padding: 10, 10
+                text: "No new updates as of 1/26/2022"
             
 """)
 
@@ -220,7 +307,8 @@ class Percentage_Calculator(Screen):
     def set_previous_screen(self):
         if sm.current != "Homepage":
             sm.transition.direction = 'right'
-            sm.current = sm.previous()    
+            sm.current = "Menu"
+            
     layouts = []
     def increase(self,entry):
         layout = GridLayout(cols=1,size_hint_y= None)
@@ -282,9 +370,13 @@ class Homepage(Screen):
 class Menu(Screen):
     pass            
 
+class updates(Screen):
+    pass
+
 sm = ScreenManager()
 sm.add_widget(Homepage(name="Homepage"))
 sm.add_widget(Menu(name="Menu"))
+sm.add_widget(updates(name="updates"))    
 sm.add_widget(Percentage_Calculator(name="Percentage_Calculator"))     
 sm.current = "Homepage"   
 
