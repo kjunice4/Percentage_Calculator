@@ -618,23 +618,9 @@ class Percentages_converter(Screen):
             return True
     
     def set_previous_screen(self):
-        print("Length is almost working")   
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("Current Page:",sm.current)
-        if sm.current != "Homepage" and sm.current != "Menu" and sm.current != "List_of_Converters" and sm.current != "updates":
-            sm.transition.direction = 'right'
-            sm.current = "List_of_Converters"
-            print("To list from Calc")
-            
-        elif sm.current == "updates":
+        if sm.current != "Homepage":
             sm.transition.direction = 'right'
             sm.current = "Menu"
-            print("To Menu from updates")   
-            
-        elif sm.current == "List_of_Converters":
-            sm.transition.direction = 'right'
-            sm.current = "Menu"
-            print("To Menu from List")
     
     layouts = []
     def convert_perc_to_frac(self,entry):
