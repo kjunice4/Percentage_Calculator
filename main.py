@@ -6,7 +6,6 @@ from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
-import numpy as np
 
 #Opening Page
 Builder.load_string("""
@@ -81,7 +80,17 @@ Builder.load_string("""
                 on_release:
                     app.root.current = "Percentage_Calculator"
                     root.manager.transition.direction = "left"
-                    
+            
+            Button:
+                font_size: 75
+                size_hint_y: None
+                background_color: 0, 1 , 1 , 1
+                height: 200
+                text: "Percentage Converter"
+                on_release:
+                    app.root.current = "Percentages_converter"
+                    root.manager.transition.direction = "left"         
+            
             Button:
                 font_size: 75
                 size_hint_y: None
@@ -294,12 +303,11 @@ Builder.load_string("""
 
 """)
 
-#Compound_Interest
 Builder.load_string("""
-<Compound_Interest>
-    id:Compound_Interest
-    name:"Compound_Interest"
-
+<Percentages_converter>
+    id: Percentages_converter
+    name:"Percentages_converter"
+    
     ScrollView:
         name: "Scroll"
         do_scroll_x: False
@@ -314,19 +322,12 @@ Builder.load_string("""
             height: self.minimum_height
             
             Label:
+                text: "Percentages Converter"   
                 font_size: 75
                 size_hint_y: None
                 height: 200
                 padding: 10, 10
-                text: "Compound Interest"
-                
-            Label:
-                font_size: 75
-                size_hint_y: None
-                height: 200
-                padding: 10, 10
-                text: "A = P(1 + r/n)^(n*t)"
-            
+                    
             BoxLayout:
                 cols: 2
                 padding:10
@@ -335,14 +336,13 @@ Builder.load_string("""
                 width:300
                 size_hint_y: None
                 height: self.minimum_height 
-
+                
                 Button:
-                    text: "Menu"   
                     font_size: 75
                     size_hint_y: None
-                    background_color: 0, 0 , 1 , 1
                     height: 200
-                    padding: 10, 10
+                    background_color: 0, 0 , 1 , 1
+                    text: "Back"
                     on_release:
                         app.root.current = "Menu"
                         root.manager.transition.direction = "right" 
@@ -356,77 +356,70 @@ Builder.load_string("""
                     height: 200
                     padding: 10, 10
                     on_release:
-                        loan.text = ""
-                        interest.text = ""
-                        time.text = ""
-                        list_of_steps.clear_widgets()       
-                                                    
-            TextInput:
-                id: loan
-                text: loan.text
-                multiline: False
-                font_size: 125
+                        list_of_steps.clear_widgets()  
+                        input.text = ""
+                    
+            BoxLayout:
+                cols: 2
+                id: steps
                 size_hint_y: None
-                height: 200
-                padding: 10
-                hint_text: "P = Principal:"
-            
-            TextInput:
-                id: interest
-                text: interest.text
-                multiline: False
-                font_size: 125
-                size_hint_y: None
-                height: 200
-                padding: 10         
-                hint_text: "r = Interest rate:"
+                height: self.minimum_height 
+                padding: 5,5         
                 
-            TextInput:
-                id: n
-                text: n.text
-                multiline: False
-                font_size: 125
+                TextInput:
+                    id: input
+                    text: input.text
+                    hint_text: "Percentage:"
+                    multiline: False
+                    font_size: 125
+                    size_hint_y: None
+                    height: 200
+                    padding: 10
+                    input_filter: lambda text, from_undo: text[:4 - len(input.text)] 
+                    
+            Label:
                 size_hint_y: None
                 height: 200
-                padding: 10         
-                hint_text: "n = Times per year:"
-                
-            TextInput:
-                id: time
-                text: time.text
-                multiline: False
-                font_size: 125
-                size_hint_y: None
-                height: 200
-                padding: 10         
-                hint_text: "t = Years:"
+                text: "Convert To:"
+                font_size: 75
                 
             BoxLayout:
                 cols: 2
                 id: steps
                 size_hint_y: None
                 height: self.minimum_height 
-                padding: 5,5   
-                    
+                padding: 5,5         
+                         
                 Button:
-                    id: steps
-                    text: "Calculate"   
+                    text: "Fraction"   
                     font_size: 75
                     size_hint_y: None
-                    background_color: 0, 1 , 0 , 1
+                    height: 200
+                    padding: 10, 10
+                    background_color: 0, 0 , 1 , 1
+                    on_release:
+                        list_of_steps.clear_widgets() 
+                        Percentages_converter.convert_perc_to_frac(input.text)
+                        
+                Button:
+                    id: steps
+                    text: "Decimal"   
+                    font_size: 75
+                    size_hint_y: None
+                    background_color: 0, 0 , 1 , 1
                     height: 200
                     padding: 10, 10
                     on_release:
                         list_of_steps.clear_widgets() 
-                        Compound_Interest.increase(loan.text + "&" + interest.text + "$" + time.text + "!" + n.text)    
-                          
+                        Percentages_converter.convert_perc_to_dec(input.text)
+                    
             GridLayout:
                 id: list_of_steps
                 cols: 1
                 size_hint: 1, None
-                height: self.minimum_height   
-
+                height: self.minimum_height                  
 """)
+
 
 #Loan_Calculator
 Builder.load_string("""
@@ -610,180 +603,202 @@ class Percentage_Calculator(Screen):
         except Exception:
             self.ids.list_of_steps.add_widget(Label(text= "Invalid Input" ,font_size = 60, size_hint_y= None, height=100))
             self.layouts.append(layout)  
+
+class Percentages_converter(Screen):
+    sm = ScreenManager()
+
+    def __init__(self, **kwargs):
+        super(Percentages_converter, self).__init__(**kwargs)
+        Window.bind(on_keyboard=self._key_handler)
+    
+    def _key_handler(self, instance, key, *args):
+        if key == 27:
+            print("Its working ESC = 27 LENGTH at Perc")
+            self.set_previous_screen()
+            return True
+    
+    def set_previous_screen(self):
+        print("Length is almost working")   
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("Current Page:",sm.current)
+        if sm.current != "Homepage" and sm.current != "Menu" and sm.current != "List_of_Converters" and sm.current != "updates":
+            sm.transition.direction = 'right'
+            sm.current = "List_of_Converters"
+            print("To list from Calc")
+            
+        elif sm.current == "updates":
+            sm.transition.direction = 'right'
+            sm.current = "Menu"
+            print("To Menu from updates")   
+            
+        elif sm.current == "List_of_Converters":
+            sm.transition.direction = 'right'
+            sm.current = "Menu"
+            print("To Menu from List")
+    
+    layouts = []
+    def convert_perc_to_frac(self,entry):
+        print("entry ",entry)
+        layout = GridLayout(cols=1,size_hint_y= None)
+        try:
+            # 2, 4, 5, 10, 25, 50
+            if len(entry) > 2:
+                numerator = entry[-2:]
+                whole = entry[:-2]
+                print("whole",whole)
+                print("numerator",numerator)
+                denomenator = 100
+                if int(numerator) % 50 == 0:
+                    while int(numerator) > 1:
+                        numerator = int(numerator) / 50
+                        denomenator = int(denomenator) / 50
+                        print("numerator 50 ",numerator)
+                        print("denomenator 50 ",denomenator)
+                        if numerator % 50 != 0 or denomenator % 50 != 0:
+                            break
                 
-            
-class Compound_Interest(Screen):
-    """
-            Button:
-                text: "Compound Interest"   
-                font_size: 75
-                background_color: 0, 1 , 0 , 1
-                size_hint_y: None
-                height: 200
-                padding: 10, 10
-                on_release:
-                    app.root.current = "Compound_Interest"
-                    root.manager.transition.direction = "left" 
-    """
-    
-    sm = ScreenManager()
+                if int(numerator) % 25 == 0:
+                    while int(numerator) > 1:
+                        numerator = int(numerator) / 25
+                        denomenator = int(denomenator) / 25
+                        print("numerator 25 ",numerator)
+                        print("denomenator 25 ",denomenator)
+                        if numerator % 25 != 0 or denomenator % 25 != 0:
+                            break
 
-    def __init__(self, **kwargs):
-        super(Compound_Interest, self).__init__(**kwargs)
-        Window.bind(on_keyboard=self._key_handler)
-
-    def _key_handler(self, instance, key, *args):
-        if key == 27:
-            self.set_previous_screen()
-            return True
-
-    def set_previous_screen(self):
-        if sm.current != "Homepage":
-            sm.transition.direction = 'right'
-            sm.current = "Menu"
-            
-    layouts = []
-    def increase(self,entry):
-        layout = GridLayout(cols=1,size_hint_y= None)
-        self.ids.list_of_steps.add_widget(layout)
-        self.layouts.append(layout)
-
-        try:
-           print()
-           print("Compounding:", entry)
-           
-           amp = entry.find("&")
-           dollar_sign = entry.find("$")
-           exclamation = entry.find("!")
-           
-           loan = float(entry[:amp])
-           print("loan =",loan)
-           
-           interest = float(entry[amp+1:dollar_sign])/100
-           print("interest =",interest)
-           
-           time = entry[dollar_sign+1:exclamation]
-           print("time =",time)
-           
-           times_per_year = entry[exclamation+1:]
-           print("times_per_year =",times_per_year)
-           
-           self.ids.list_of_steps.add_widget(Label(text= "Compound Interest",font_size = 50, size_hint_y= None, height=100))
-           
-           i = 0
-           while i < float(time):
-               loan = float(loan)*(1+(float(interest)/float(times_per_year)))**float(float(times_per_year)*float(time))
-               print("final_amount",loan)
-               self.ids.list_of_steps.add_widget(Label(text= "Year " + str(i+1) + " : " + "${:,.2f}".format(float(loan)),font_size = 50, size_hint_y= None, height=100))
-               i = i + 1
-           
+                if int(numerator) % 10 == 0:
+                    while int(numerator) > 1:
+                        numerator = int(numerator) / 10
+                        denomenator = int(denomenator) / 10
+                        print("numerator 10 ",numerator)
+                        print("denomenator 10 ",denomenator)
+                        if numerator % 10 != 0 or denomenator % 10 != 0:
+                            break
+                
+                if int(numerator) % 5 == 0:
+                    while int(numerator) > 1:
+                        numerator = int(numerator) / 5
+                        denomenator = int(denomenator) / 5
+                        print("numerator 5 ",numerator)
+                        print("denomenator 5 ",denomenator)
+                        if numerator % 5 != 0 or denomenator % 5 != 0:
+                            break
+                
+                if int(numerator) % 2 == 0:
+                    while int(numerator) > 1:
+                        numerator = int(numerator) / 2
+                        denomenator = int(denomenator) / 2
+                        print("numerator 2 ",numerator)
+                        print("denomenator 2 ",denomenator)
+                        if numerator % 2 != 0 or denomenator % 2 != 0:
+                            break
+                        
+                if str(numerator) == "00":
+                    numerator = "1" + str(numerator)
+                    
+                if str(numerator)[0] == "0":
+                    numerator = str(numerator)[1]    
+                    
+                if int(numerator) != int(denomenator):
+                    self.ids.list_of_steps.add_widget(Label(text= str(entry) + "% to Fraction = ", font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= str(numerator).replace(".0",""), font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= str(whole).replace(".0","") + " " + "---" * len(str(denomenator)) + "  ", font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= str(denomenator).replace(".0",""), font_size = 75, size_hint_y= None, height=100))
+                    self.layouts.append(layout)     
+                
+                if int(numerator) == int(denomenator):
+                    self.ids.list_of_steps.add_widget(Label(text= entry + "% to Fraction = ", font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= str(entry).replace(".0","") , font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= "-----", font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= str(denomenator).replace(".0",""), font_size = 75, size_hint_y= None, height=100))
+                    self.layouts.append(layout)   
+                
+            if len(entry) <= 2:
+                numerator = entry
+                print("numerator",numerator)
+                denomenator = 100
+                if int(numerator) % 50 == 0:
+                    while int(numerator) > 1:
+                        numerator = int(numerator) / 50
+                        denomenator = int(denomenator) / 50
+                        print("numerator 50 ",numerator)
+                        print("denomenator 50 ",denomenator)
+                        if numerator % 50 != 0 or denomenator % 50 != 0:
+                            break
+                    
+                if int(numerator) % 25 == 0:
+                    while int(numerator) > 1:
+                        numerator = int(numerator) / 25
+                        denomenator = int(denomenator) / 25
+                        print("numerator 25 ",numerator)
+                        print("denomenator 25 ",denomenator)
+                        if numerator % 25 != 0 or denomenator % 25 != 0:
+                            break
+                
+                if int(numerator) % 10 == 0:
+                    while int(numerator) > 1:
+                        numerator = int(numerator) / 10
+                        denomenator = int(denomenator) / 10
+                        print("numerator 10 ",numerator)
+                        print("denomenator 10 ",denomenator)
+                        if numerator % 10 != 0 or denomenator % 10 != 0:
+                            break
+                
+                if int(numerator) % 5 == 0:
+                    while int(numerator) > 1:
+                        numerator = int(numerator) / 5
+                        denomenator = int(denomenator) / 5
+                        print("numerator 5 ",numerator)
+                        print("denomenator 5 ",denomenator)
+                        if numerator % 5 != 0 or denomenator % 5 != 0:
+                            break
+                            
+                if int(numerator) % 2 == 0:
+                    while int(numerator) > 1:
+                        numerator = int(numerator) / 2
+                        denomenator = int(denomenator) / 2
+                        print("numerator 2 ",numerator)
+                        print("denomenator 2 ",denomenator)
+                        if numerator % 2 != 0 or denomenator % 2 != 0:
+                            break
+                        
+                if str(numerator)[0] == "0":
+                    numerator = str(numerator)[1]
+                    
+                if int(numerator) != int(denomenator):
+                    self.ids.list_of_steps.add_widget(Label(text= str(entry) + "% to Fraction = ", font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= str(numerator).replace(".0",""), font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= "----", font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= str(denomenator).replace(".0",""), font_size = 75, size_hint_y= None, height=100))
+                    self.layouts.append(layout)     
+                    
+                if int(numerator) == int(denomenator):
+                    self.ids.list_of_steps.add_widget(Label(text= entry + "% to Fraction = ", font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= str(entry).replace(".0","") , font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= "-----", font_size = 75, size_hint_y= None, height=100))
+                    self.ids.list_of_steps.add_widget(Label(text= str(denomenator).replace(".0",""), font_size = 75, size_hint_y= None, height=100))
+                    self.layouts.append(layout)  
+                
         except Exception:
-            self.ids.list_of_steps.add_widget(Label(text= "Invalid Input" ,font_size = 50, size_hint_y= None, height=100))
-            self.layouts.append(layout)  
-    """           
-    def decrease(self,entry):
-        layout = GridLayout(cols=1,size_hint_y= None)
-        self.ids.list_of_steps.add_widget(layout)
-        self.layouts.append(layout)
-        
-        try:
-           print()
-           print("DECREASING", entry)
-           
-           amp = entry.find("&")
-           dollar_sign = entry.find("$")
-           
-           loan = float(entry[:amp])
-           print("loan =",loan)
-           
-           interest = float(entry[amp+1:dollar_sign])/100
-           print("interest =",interest)
-           
-           time = entry[dollar_sign+1:]
-           print("time =",time)
-           
-           self.ids.list_of_steps.add_widget(Label(text= "Decreasing Compound Interest",font_size = 50, size_hint_y= None, height=100))
-           
-           i = 0
-           while i < int(time):
-               loan = str(float(loan) - float(float(loan) * float(interest)))
-               print("loan of years" + str(i) + " =",loan)
-               self.ids.list_of_steps.add_widget(Label(text= "Year " + str(i+1) + " = $" + "{:,.2f}".format(float(loan)),font_size = 60, size_hint_y= None, height=100))
-               i = i + 1
-           
-        except Exception:
-            self.ids.list_of_steps.add_widget(Label(text= "Invalid Input" ,font_size = 50, size_hint_y= None, height=100))
-            self.layouts.append(layout)  
-        """
-class Loan_Calculator(Screen):
-    
-    """
-    Button:
-        text: "Loan Calculator"   
-        font_size: 75
-        background_color: 1, 1 , 0 , 1
-        size_hint_y: None
-        height: 200
-        padding: 10, 10
-        on_release:
-            app.root.current = "Loan_Calculator"
-            root.manager.transition.direction = "left" 
-    """
-    
-    sm = ScreenManager()
-
-    def __init__(self, **kwargs):
-        super(Loan_Calculator, self).__init__(**kwargs)
-        Window.bind(on_keyboard=self._key_handler)
-
-    def _key_handler(self, instance, key, *args):
-        if key == 27:
-            self.set_previous_screen()
-            return True
-
-    def set_previous_screen(self):
-        if sm.current != "Homepage":
-            sm.transition.direction = 'right'
-            sm.current = "Menu"
+            self.ids.list_of_steps.add_widget(Label(text="Invalid Input", font_size = 75, size_hint_y= None, height=100))
+            self.layouts.append(layout)
             
-    layouts = []
-    def calculate(self,entry):
+    def convert_perc_to_dec(self,entry):
+        print("entry ",entry)
         layout = GridLayout(cols=1,size_hint_y= None)
-        self.ids.list_of_steps.add_widget(layout)
-        self.layouts.append(layout)
-
         try:
-           print()
-           print("calculate", entry)
-           
-           amp = entry.find("&")
-           dollar_sign = entry.find("$")
-           
-           loan = float(entry[:amp])
-           print("loan =",loan)
-           
-           interest = float(entry[amp+1:dollar_sign])/100
-           print("interest =",interest)
-           
-           time = entry[dollar_sign+1:]
-           print("Years =",time)
-           
-           times_per_year = float(time) * 12
-           print('times_per_year',times_per_year)
-           
-           #Loop Total Interest
-           initial_interest_payment = str(float(loan)*float(interest)/12)
-           print("initial_interest_payment",initial_interest_payment)
-           
-           #Principal = Interest / (rate of Interest * time period)
-           principal = (float(interest) * 100) / ()
-           print("principal",principal)
-           
-           
+            dec = entry + "/100"
+            evaled = str(eval(dec))
+            print("evaled",evaled)
+            self.ids.list_of_steps.add_widget(Label(text= entry + "% to Decimal = ", font_size = 75, size_hint_y= None, height=100))
+            self.ids.list_of_steps.add_widget(Label(text= evaled, font_size = 75, size_hint_y= None, height=100))
+            self.layouts.append(layout)
         except Exception:
-            self.ids.list_of_steps.add_widget(Label(text= "Invalid Input" ,font_size = 50, size_hint_y= None, height=100))
-            self.layouts.append(layout)  
+            self.ids.list_of_steps.add_widget(Label(text="Invalid Input", font_size = 75, size_hint_y= None, height=100))   
+            self.layouts.append(layout)
 
+
+            
 class Homepage(Screen):
     pass            
 
@@ -797,9 +812,8 @@ sm = ScreenManager()
 sm.add_widget(Homepage(name="Homepage"))
 sm.add_widget(Menu(name="Menu"))
 sm.add_widget(updates(name="updates"))    
-sm.add_widget(Percentage_Calculator(name="Percentage_Calculator"))     
-sm.add_widget(Compound_Interest(name="Compound_Interest"))
-sm.add_widget(Loan_Calculator(name="Loan_Calculator"))
+sm.add_widget(Percentage_Calculator(name="Percentage_Calculator"))   
+sm.add_widget(Percentages_converter(name="Percentages_converter"))   
 sm.current = "Homepage"   
 
 
