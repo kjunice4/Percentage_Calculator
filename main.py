@@ -421,116 +421,7 @@ Builder.load_string("""
 """)
 
 
-#Loan_Calculator
-Builder.load_string("""
-<Loan_Calculator>
-    id:Loan_Calculator
-    name:"Loan_Calculator"
 
-    ScrollView:
-        name: "Scroll"
-        do_scroll_x: False
-        do_scroll_y: True
-        
-        GridLayout:
-            cols: 1
-            padding:10
-            spacing:10
-            size_hint: 1, None
-            width:200
-            height: self.minimum_height
-            
-            Label:
-                font_size: 75
-                size_hint_y: None
-                height: 200
-                padding: 10, 10
-                text: "Loan Calculator"
-            
-            BoxLayout:
-                cols: 2
-                padding:10
-                spacing:10
-                size_hint: 1, None
-                width:300
-                size_hint_y: None
-                height: self.minimum_height 
-
-                Button:
-                    text: "Menu"   
-                    font_size: 75
-                    size_hint_y: None
-                    background_color: 0, 0 , 1 , 1
-                    height: 200
-                    padding: 10, 10
-                    on_release:
-                        app.root.current = "Menu"
-                        root.manager.transition.direction = "right" 
-                        
-                Button:
-                    id: steps
-                    text: "Clear All"   
-                    font_size: 75
-                    size_hint_y: None
-                    background_color: 1, 0 , 0 , 1
-                    height: 200
-                    padding: 10, 10
-                    on_release:
-                        loan.text = ""
-                        interest.text = ""
-                        time.text = ""
-                        list_of_steps.clear_widgets()       
-                                                    
-            TextInput:
-                id: loan
-                text: loan.text
-                multiline: False
-                font_size: 125
-                size_hint_y: None
-                height: 200
-                padding: 10
-                hint_text: "Loan Amount:"
-            
-            TextInput:
-                id: interest
-                text: interest.text
-                multiline: False
-                font_size: 125
-                size_hint_y: None
-                height: 200
-                padding: 10         
-                hint_text: "Yearly Interest rate:"
-                
-            TextInput:
-                id: time
-                text: time.text
-                multiline: False
-                font_size: 125
-                size_hint_y: None
-                height: 200
-                padding: 10         
-                hint_text: "Years:"
-                
-            Button:
-                id: steps
-                text: "Calculate"   
-                font_size: 75
-                size_hint_y: None
-                background_color: 0, 1 , 0 , 1
-                height: 200
-                padding: 10, 10
-                on_release:
-                    list_of_steps.clear_widgets() 
-                    Loan_Calculator.calculate(loan.text + "&" + interest.text + "$" + time.text)
-    
-                       
-            GridLayout:
-                id: list_of_steps
-                cols: 1
-                size_hint: 1, None
-                height: self.minimum_height   
-
-""")
 
 class Percentage_Calculator(Screen):
     sm = ScreenManager()
@@ -540,15 +431,11 @@ class Percentage_Calculator(Screen):
         Window.bind(on_keyboard=self._key_handler)
 
     def _key_handler(self, instance, key, *args):
+        print("key:",key)
         if key == 27:
-            self.set_previous_screen()
+            sm.current = sm.current
             return True
 
-    def set_previous_screen(self):
-        if sm.current != "Homepage":
-            sm.transition.direction = 'right'
-            sm.current = "Menu"
-            
     layouts = []
     def increase(self,entry):
         layout = GridLayout(cols=1,size_hint_y= None)
@@ -609,18 +496,6 @@ class Percentages_converter(Screen):
 
     def __init__(self, **kwargs):
         super(Percentages_converter, self).__init__(**kwargs)
-        Window.bind(on_keyboard=self._key_handler)
-    
-    def _key_handler(self, instance, key, *args):
-        if key == 27:
-            print("Its working ESC = 27 LENGTH at Perc")
-            self.set_previous_screen()
-            return True
-    
-    def set_previous_screen(self):
-        if sm.current != "Homepage":
-            sm.transition.direction = 'right'
-            sm.current = "Menu"
     
     layouts = []
     def convert_perc_to_frac(self,entry):
@@ -783,8 +658,6 @@ class Percentages_converter(Screen):
             self.ids.list_of_steps.add_widget(Label(text="Invalid Input", font_size = 75, size_hint_y= None, height=100))   
             self.layouts.append(layout)
 
-
-            
 class Homepage(Screen):
     pass            
 
@@ -804,6 +677,16 @@ sm.current = "Homepage"
 
 
 class Percentage_Calculator(App):
+    def __init__(self, **kwargs):
+        super(Percentage_Calculator, self).__init__(**kwargs)
+        Window.bind(on_keyboard=self._key_handler)
+    
+    def _key_handler(self, instance, key, *args):
+        print("key:",key)
+        if key == 27:
+            sm.current = sm.current
+            return True
+        
     def build(app):
         return sm
 
